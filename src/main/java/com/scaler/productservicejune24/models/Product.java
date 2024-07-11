@@ -1,6 +1,5 @@
 package com.scaler.productservicejune24.models;
 
-import jdk.jfr.Category;
 import lombok.Getter;
 import lombok.Setter;
 
