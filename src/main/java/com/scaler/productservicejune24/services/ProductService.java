@@ -14,4 +14,6 @@ public interface ProductService {
     List<Product> getLimitedProducts(long count);
 
     Product updateProduct(long id, Product product);
+
+    Product replaceProduct(long id, Product product);
 }

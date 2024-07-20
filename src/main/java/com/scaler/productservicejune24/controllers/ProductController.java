@@ -61,4 +61,9 @@ public class ProductController {
     public Product updateProduct(@PathVariable("id") long id, @RequestBody Product product){
         return productService.updateProduct(id, product);
     }
+
+    @PutMapping("/{id}")
+    public Product replaceProduct(@PathVariable("id") long id, @RequestBody Product product){
+        return productService.replaceProduct(id, product);
+    }
 }

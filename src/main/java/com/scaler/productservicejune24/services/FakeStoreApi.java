@@ -76,11 +76,7 @@ public class FakeStoreApi implements ProductService{
         // Patch
 
         // Creating request body using fakeStoreProductDto
-        FakeStoreProductDto fakeStoreProductDto = new FakeStoreProductDto();
-        fakeStoreProductDto.setId(id);
-        fakeStoreProductDto.setTitle(product.getTitle());
-        fakeStoreProductDto.setPrice(product.getPrice());
-        fakeStoreProductDto.setCategory(product.getCategory().getName());
+        FakeStoreProductDto fakeStoreProductDto = convertProductToFakeStoreProductDto(id, product);
 
 //        FakeStoreProductDto response = restTemplate.patchForObject(
 //                "https://fakestoreapi.com/products/" + id, fakeStoreProductDto, FakeStoreProductDto.class);
@@ -99,6 +95,28 @@ public class FakeStoreApi implements ProductService{
         return convertDtoToProduct(response);
     }
 
+    @Override
+    public Product replaceProduct(long id, Product product) {
+
+        FakeStoreProductDto fakeStoreProductDto = convertProductToFakeStoreProductDto(id, product);
+
+//        FakeStoreProductDto response = restTemplate.patchForObject(
+//                "https://fakestoreapi.com/products/" + id, fakeStoreProductDto, FakeStoreProductDto.class);
+
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(fakeStoreProductDto, FakeStoreProductDto.class);
+
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        restTemplate.setRequestFactory(requestFactory);
+
+        HttpMessageConverterExtractor<FakeStoreProductDto> responseExtractor = new HttpMessageConverterExtractor(FakeStoreProductDto.class,
+                restTemplate.getMessageConverters());
+
+        FakeStoreProductDto response = restTemplate.execute("https://fakestoreapi.com/products/" + id,
+                HttpMethod.PUT, requestCallback, responseExtractor);
+
+        return convertDtoToProduct(response);
+    }
+
     public Product convertDtoToProduct(FakeStoreProductDto fakeStoreProductDto){
         // convert the dto data to product type
         Product product = new Product();
@@ -113,5 +131,16 @@ public class FakeStoreApi implements ProductService{
 
         product.setCategory(category);
         return product;
+    }
+
+    public FakeStoreProductDto convertProductToFakeStoreProductDto(long id, Product product){
+        // Creating request body using fakeStoreProductDto
+        FakeStoreProductDto fakeStoreProductDto = new FakeStoreProductDto();
+        fakeStoreProductDto.setId(id);
+        fakeStoreProductDto.setTitle(product.getTitle());
+        fakeStoreProductDto.setPrice(product.getPrice());
+        fakeStoreProductDto.setCategory(product.getCategory().getName());
+
+        return fakeStoreProductDto;
     }
 }
