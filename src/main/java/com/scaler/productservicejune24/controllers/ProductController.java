@@ -1,8 +1,10 @@
 package com.scaler.productservicejune24.controllers;
 
+import com.scaler.productservicejune24.exceptions.NotEnoughProductInfoException;
 import com.scaler.productservicejune24.exceptions.ProductNotFoundException;
 import com.scaler.productservicejune24.models.Product;
 import com.scaler.productservicejune24.services.ProductService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,7 @@ public class ProductController {
 
     ProductService productService;
 
-    ProductController(ProductService productService) {
+    ProductController(@Qualifier("SelfProductService") ProductService productService) {
         this.productService = productService;
     }
 
@@ -47,6 +49,11 @@ public class ProductController {
         return response;
     }
 
+    @GetMapping("/priceGreaterThan/{price}")
+    public List<Product> getProductByPriceGreaterThan(@PathVariable("price") double price) {
+        return productService.getProductsPriceGreaterThan(price);
+    }
+
     @GetMapping("")
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
@@ -58,12 +65,22 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
-    public Product updateProduct(@PathVariable("id") long id, @RequestBody Product product){
+    public Product updateProduct(@PathVariable("id") long id, @RequestBody Product product) throws ProductNotFoundException {
         return productService.updateProduct(id, product);
     }
 
     @PutMapping("/{id}")
-    public Product replaceProduct(@PathVariable("id") long id, @RequestBody Product product){
+    public Product replaceProduct(@PathVariable("id") long id, @RequestBody Product product) throws NotEnoughProductInfoException, ProductNotFoundException {
         return productService.replaceProduct(id, product);
     }
+
+    @PostMapping()
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) throws ProductNotFoundException, NotEnoughProductInfoException {
+
+        return new ResponseEntity<Product>(
+                productService.createProduct(product),
+                HttpStatus.OK
+        );
+    }
+
 }

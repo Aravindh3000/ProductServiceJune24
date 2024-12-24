@@ -1,6 +1,7 @@
 package com.scaler.productservicejune24.controllerAdvice;
 
 import com.scaler.productservicejune24.dto.ExceptionDto;
+import com.scaler.productservicejune24.exceptions.NotEnoughProductInfoException;
 import com.scaler.productservicejune24.exceptions.ProductNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,4 +45,14 @@ public class globalExceptionHandler {
         return responseEntity;
     }
 
+    @ExceptionHandler(NotEnoughProductInfoException.class)
+    public ResponseEntity<ExceptionDto> handleNotEnoughProductInfoException(){
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setMessage("Not Enough Product Info");
+        exceptionDto.setSolution("Try again with valid inputs");
+        return new ResponseEntity<>(
+                exceptionDto,
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

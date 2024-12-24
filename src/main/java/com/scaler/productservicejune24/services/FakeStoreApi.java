@@ -1,6 +1,7 @@
 package com.scaler.productservicejune24.services;
 
 import com.scaler.productservicejune24.dto.FakeStoreProductDto;
+import com.scaler.productservicejune24.exceptions.NotEnoughProductInfoException;
 import com.scaler.productservicejune24.exceptions.ProductNotFoundException;
 import com.scaler.productservicejune24.models.Category;
 import com.scaler.productservicejune24.models.Product;
@@ -13,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service // this marks this class as special so bean created
+@Service("FakeStoreAPI") // this marks this class as special so bean created
 public class FakeStoreApi implements ProductService{
     // fetch data from fake store site
 
@@ -115,6 +116,16 @@ public class FakeStoreApi implements ProductService{
                 HttpMethod.PUT, requestCallback, responseExtractor);
 
         return convertDtoToProduct(response);
+    }
+
+    @Override
+    public List<Product> getProductsPriceGreaterThan(double price) {
+        return List.of();
+    }
+
+    @Override
+    public Product createProduct(Product product) throws NotEnoughProductInfoException {
+        return null;
     }
 
     public Product convertDtoToProduct(FakeStoreProductDto fakeStoreProductDto){
