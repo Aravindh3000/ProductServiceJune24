@@ -5,12 +5,15 @@ import com.scaler.productservicejune24.exceptions.NotEnoughProductInfoException;
 import com.scaler.productservicejune24.exceptions.ProductNotFoundException;
 import com.scaler.productservicejune24.models.Category;
 import com.scaler.productservicejune24.models.Product;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,13 +22,22 @@ public class FakeStoreApi implements ProductService{
     // fetch data from fake store site
 
     private RestTemplate restTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
-    public FakeStoreApi(RestTemplate restTemplate) {
+    public FakeStoreApi(RestTemplate restTemplate, RedisTemplate<String, Object> redisTemplate) {
         this.restTemplate = restTemplate;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
     public Product getProductById(long id) throws ProductNotFoundException {
+
+        Product product = (Product) redisTemplate.opsForHash().get("PRODUCTS", "PRODUCT_" + id);
+
+        if(product != null) {
+            return product;
+        }
+
         FakeStoreProductDto fakeStoreProductDto = restTemplate.getForObject(
                 "https://fakestoreapi.com/products/" + id,
                 FakeStoreProductDto.class
@@ -35,8 +47,12 @@ public class FakeStoreApi implements ProductService{
         if(fakeStoreProductDto == null){
             throw new ProductNotFoundException("Product with id " + id + " not found");
         }
-        return convertDtoToProduct(fakeStoreProductDto);
 
+        product = convertDtoToProduct(fakeStoreProductDto);
+//        redisTemplate.opsForHash().put("PRODUCTS", "PRODUCT_" + id, product);
+        redisTemplate.opsForValue().set("PRODUCT_" + id, product, Duration.ofMinutes(30));
+
+        return product;
     }
 
     @Override
